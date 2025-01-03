@@ -3,10 +3,10 @@ name: Deploy React App to GitHub Pages
 on:
   push:
     branches:
-      - master  # Deploy to live when changes are pushed to the 'master' branch (production)
+      - master  # Deploy to live when changes are pushed to the 'master' branch
   pull_request:
     branches:
-      - master  # Deploy to preview when a PR is opened against 'master'
+      - master  # Deploy to preview when a PR is opened or updated targeting 'master'
 
 jobs:
   deploy:
@@ -39,11 +39,9 @@ jobs:
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}  # Token is automatically provided by GitHub
-          # For Preview Channel: Deploy to 'preview' branch
-          # For Live Channel: Deploy to 'gh-pages' branch
+          # For preview deployment, use the 'preview' branch or '/preview' folder
           publish_dir: ./build  # The directory containing your built React app
-          # Conditional deploy branch based on whether it's a pull request or a push to master
-          publish_branch: ${{ github.event_name == 'push' && github.ref == 'refs/heads/master' && 'gh-pages' || 'preview' }} 
+          publish_branch: ${{ github.event_name == 'push' && github.ref == 'refs/heads/master' && 'gh-pages' || 'preview' }}
 
       # Output the deployed URL
       - name: Display deployed URL

@@ -34,10 +34,6 @@ jobs:
       - name: Build the app
         run: npm run build
 
-      # Debugging: List the contents of the build directory
-      - name: List build directory contents
-        run: ls -l ./build
-
       # Deploy to GitHub Pages (for master branch deployment)
       - name: Deploy to GitHub Pages (live)
         if: github.event_name == 'push' && github.ref == 'refs/heads/master'  # Only deploy when merged into master

@@ -3,17 +3,17 @@ name: Deploy React App to GitHub Pages
 on:
   push:
     branches:
-      - master  # Deploy to live when changes are pushed to the 'master' branch
+      - master  # Deploy only when the 'master' branch is updated (after merge)
   pull_request:
     branches:
-      - master  # Deploy to preview when a PR is opened or updated targeting 'master'
+      - master  # For preview when a PR is targeting 'master'
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
 
     permissions:
-      contents: write  # Grant write permission to the 'contents' (to push to the repository)
+      contents: write  # Grant write permission to push to the repository
 
     steps:
       # Checkout the code
@@ -34,16 +34,25 @@ jobs:
       - name: Build the app
         run: npm run build
 
-      # Deploy to GitHub Pages
+      # Deploy only after merging to master (for production)
       - name: Deploy to GitHub Pages
+        if: github.event_name == 'push' && github.ref == 'refs/heads/master'  # Ensure it's a push to master
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}  # Token is automatically provided by GitHub
-          # For preview deployment, use the 'preview' branch or '/preview' folder
           publish_dir: ./build  # The directory containing your built React app
-          publish_branch: ${{ github.event_name == 'push' && github.ref == 'refs/heads/master' && 'gh-pages' || 'preview' }}
+          publish_branch: gh-pages  # Deploy to 'gh-pages' branch for live site
 
-      # Output the deployed URL
+      # Preview deployment for PR (not to 'gh-pages' but to 'preview' branch)
+      - name: Deploy preview for PR
+        if: github.event_name == 'pull_request'  # For pull request event
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./build  # The directory containing your built React app
+          publish_branch: preview  # Deploy to 'preview' branch for PR preview
+
+      # Output the deployed URL (for PR preview and master deployment)
       - name: Display deployed URL
         run: |
           if [[ $GITHUB_REF == "refs/heads/master" ]]; then

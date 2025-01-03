@@ -24,7 +24,7 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v2
         with:
-          node-version: '18'  # Use your desired Node.js version
+          node-version: '1'  # Use your desired Node.js version
 
       # Install dependencies
       - name: Install dependencies
@@ -44,7 +44,7 @@ jobs:
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./build  # Use the default build directory
+          publish_dir: ./build  # The directory containing your built React app
           publish_branch: gh-pages  # Deploy to 'gh-pages' branch for live site
 
       # Deploy preview for PR (for preview branch deployment)
@@ -53,7 +53,7 @@ jobs:
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: .build/preview  # Deploy from the preview directory for PR
+          publish_dir: ./build  # Deploy the build to the preview folder
           publish_branch: gh-pages  # Deploy to 'gh-pages' branch for PR preview
           user_name: 'GitHub Actions'
           user_email: 'github-actions@github.com'
@@ -62,10 +62,8 @@ jobs:
       # Output the deployed URLs (for PR preview and master deployment)
       - name: Display deployed URLs
         run: |
-          REPO_NAME=$(basename $GITHUB_REPOSITORY)  # Get the repository name
           if [[ $GITHUB_REF == "refs/heads/master" ]]; then
-            echo "Your live app is available at https://$GITHUB_ACTOR.github.io/$REPO_NAME/"
+            echo "Your live app is available at https://vimal-g-eq.github.io/testing-preview-url/"
           else
-            echo "Preview is available at https://$GITHUB_ACTOR.github.io/$REPO_NAME/preview/"
+            echo "Preview is available at https://vimal-g-eq.github.io/testing-preview-url/preview/"
           fi
-          

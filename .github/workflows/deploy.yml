@@ -3,7 +3,10 @@ name: Deploy React App to GitHub Pages
 on:
   push:
     branches:
-      - master  # Trigger deployment when changes are pushed to the 'master' branch
+      - master  # Deploy to live when changes are pushed to the 'master' branch (production)
+  pull_request:
+    branches:
+      - master  # Deploy to preview when a PR is opened against 'master'
 
 jobs:
   deploy:
@@ -21,7 +24,7 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v2
         with:
-          node-version: '14'  # Use the desired Node.js version
+          node-version: '14'  # Use your desired Node.js version
 
       # Install dependencies
       - name: Install dependencies
@@ -35,9 +38,18 @@ jobs:
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}  # Token automatically provided by GitHub
+          github_token: ${{ secrets.GITHUB_TOKEN }}  # Token is automatically provided by GitHub
+          # For Preview Channel: Deploy to 'preview' branch
+          # For Live Channel: Deploy to 'gh-pages' branch
           publish_dir: ./build  # The directory containing your built React app
+          # Conditional deploy branch based on whether it's a pull request or a push to master
+          publish_branch: ${{ github.event_name == 'push' && github.ref == 'refs/heads/master' && 'gh-pages' || 'preview' }} 
 
-      # Output the deployed URL (if successful)
+      # Output the deployed URL
       - name: Display deployed URL
-        run: echo "Your app is live at https://vimal-g-eq.github.io/testing-preview-url/"
+        run: |
+          if [[ $GITHUB_REF == "refs/heads/master" ]]; then
+            echo "Your app is live at https://vimal-g-eq.github.io/testing-preview-url/"
+          else
+            echo "Preview is available at https://vimal-g-eq.github.io/testing-preview-url/preview/"
+          fi

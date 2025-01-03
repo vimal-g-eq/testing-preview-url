@@ -49,11 +49,11 @@ jobs:
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./build  # Deploy the build to a subfolder within gh-pages
+          publish_dir: ./build  # Deploy the build to the preview folder
           publish_branch: gh-pages  # Deploy to 'gh-pages' branch for PR preview
           user_name: 'GitHub Actions'
-          user_email: 'vimal.gandhi@equestsolutions.net'
-          target_dir: preview  # Specify the preview subfolder
+          user_email: 'github-actions@github.com'
+          target_dir: preview  # Specify the 'preview' subfolder in gh-pages branch
 
       # Output the deployed URLs (for PR preview and master deployment)
       - name: Display deployed URLs

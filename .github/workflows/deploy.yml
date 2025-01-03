@@ -53,7 +53,6 @@ jobs:
           publish_branch: gh-pages  # Deploy to 'gh-pages' branch for PR preview
           user_name: 'GitHub Actions'
           user_email: 'vimal.gandhi@equestsolutions.net'
-          publish_dir: ./build  # Ensure the preview is placed in a subfolder
           target_dir: preview  # Specify the preview subfolder
 
       # Output the deployed URLs (for PR preview and master deployment)

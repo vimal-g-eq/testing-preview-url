@@ -3,7 +3,7 @@ name: Deploy React App to GitHub Pages
 on:
   push:
     branches:
-      - master  # Deploy when changes are pushed to the 'master' branch
+      - master  # Trigger deployment when changes are pushed to the 'master' branch
 
 jobs:
   deploy:
@@ -21,7 +21,7 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v2
         with:
-          node-version: '14'  # Use your desired Node.js version
+          node-version: '14'  # Use the desired Node.js version
 
       # Install dependencies
       - name: Install dependencies
@@ -35,5 +35,9 @@ jobs:
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}  # Token is automatically provided by GitHub
+          github_token: ${{ secrets.GITHUB_TOKEN }}  # Token automatically provided by GitHub
           publish_dir: ./build  # The directory containing your built React app
+
+      # Output the deployed URL (if successful)
+      - name: Display deployed URL
+        run: echo "Your app is live at https://vimal-g-eq.github.io/testing-preview-url/"

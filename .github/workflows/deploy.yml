@@ -39,7 +39,7 @@ jobs:
         if: github.event_name == 'push' && github.ref == 'refs/heads/master'  # Only deploy when merged into master
         uses: peaceiris/actions-gh-pages@v3
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}  # Token is automatically provided by GitHub
+          github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./build  # The directory containing your built React app
           publish_branch: gh-pages  # Deploy to 'gh-pages' branch for live site
 
@@ -50,7 +50,8 @@ jobs:
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./build  # The directory containing your built React app
-          publish_branch: preview  # Deploy to 'preview' branch for PR preview
+          publish_branch: gh-pages  # Deploy to 'gh-pages' branch for PR preview
+          publish_dir: ./build/preview  # Ensure the preview is placed in a subfolder for the preview
 
       # Output the deployed URLs (for PR preview and master deployment)
       - name: Display deployed URLs

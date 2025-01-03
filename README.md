@@ -68,3 +68,12 @@ This section has moved here: [https://facebook.github.io/create-react-app/docs/d
 ### `npm run build` fails to minify
 
 This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+
+
+<!--  npm install gh-pages --save-dev -->
+
+<!--  Add this into package.json file -->
+<!-- "devDependencies": {
+    "gh-pages": "^6.3.0"
+  },
+  "homepage": "https://vimal-g-eq.github.io/testing-preview-url" -->

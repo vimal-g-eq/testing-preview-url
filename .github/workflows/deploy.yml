@@ -53,26 +53,12 @@ jobs:
           publish_dir: ./build
           publish_branch: gh-pages
 
-      # Add comment to PR with URLs
-      - name: Add PR Comment
-        if: github.event_name == 'pull_request'
-        uses: actions/github-script@v6
-        with:
-          script: |
-            const preview_url = `https://vimal-g-eq.github.io/testing-preview-url/preview/${context.issue.number}`;
-            const production_url = 'https://vimal-g-eq.github.io/testing-preview-url';
-            
-            const comment = `## 🚀 Deployment URLs
-            
-            ### ✨ Preview (Your Changes)
-            ${preview_url}
-            
-            ### 🌍 Production (Current Master)
-            ${production_url}`;
-            
-            await github.rest.issues.createComment({
-              owner: context.repo.owner,
-              repo: context.repo.name,
-              issue_number: context.issue.number,
-              body: comment
-            });
+      # Output deployment URLs in the action logs
+      - name: Output Deployment URLs
+        run: |
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            echo "Preview URL (Your Changes): https://vimal-g-eq.github.io/testing-preview-url/preview/${{ github.event.pull_request.number }}"
+            echo "Production URL (Current Master): https://vimal-g-eq.github.io/testing-preview-url"
+          else
+            echo "Production URL: https://vimal-g-eq.github.io/testing-preview-url"
+          fi

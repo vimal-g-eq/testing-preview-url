@@ -10,16 +10,26 @@ permissions:
 
 jobs:
   production-deploy:
-    uses: ./.github/workflows/setup-build-deploy.yml  # Make sure this path is correct
-    with:
-      node_version: '18'
-    secrets:
-      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-  deploy-production:
-    needs: production-deploy
     runs-on: ubuntu-latest
+
     steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Setup Node
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Build
+        run: npm run build
+        env:
+          CI: false
+
       - name: Deploy Production
         uses: peaceiris/actions-gh-pages@v3
         with:

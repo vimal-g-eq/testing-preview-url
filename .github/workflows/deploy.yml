@@ -3,63 +3,67 @@ name: Deploy React App to GitHub Pages
 on:
   push:
     branches:
-      - master  # Deploy only when the 'master' branch is updated (after merge)
+      - master
   pull_request:
     branches:
-      - master  # For preview when a PR is targeting 'master'
+      - master
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
-
     permissions:
-      contents: write  # Grant write permission to push to the repository
-
+      contents: write
     steps:
-      # Checkout the code
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
-      # Set up Node.js environment
-      - name: Set up Node.js
-        uses: actions/setup-node@v2
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
         with:
-          node-version: '14'  # Use your desired Node.js version
+          node-version: '18'
 
-      # Install dependencies
       - name: Install dependencies
         run: npm install
 
-      # Build the React app
       - name: Build the app
         run: npm run build
+        env:
+          CI: false
 
-      # Deploy to GitHub Pages (for master branch deployment)
-      - name: Deploy to GitHub Pages (live)
-        if: github.event_name == 'push' && github.ref == 'refs/heads/master'  # Only deploy when merged into master
+      - name: Deploy to GitHub Pages (Production)
+        if: github.event_name == 'push' && github.ref == 'refs/heads/master'
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./build  # The directory containing your built React app
-          publish_branch: gh-pages  # Deploy to 'gh-pages' branch for live site
+          publish_dir: ./build
+          publish_branch: gh-pages
 
-      # Deploy preview for PR (for preview branch deployment)
-      - name: Deploy preview for PR
-        if: github.event_name == 'pull_request'  # For pull request event
+      - name: Deploy Preview
+        if: github.event_name == 'pull_request'
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./build  # Deploy the build to the preview folder
-          publish_branch: gh-pages  # Deploy to 'gh-pages' branch for PR preview
-          user_name: 'GitHub Actions'
-          user_email: 'github-actions@github.com'
-          target_dir: preview  # Specify the 'preview' subfolder in gh-pages branch
+          publish_dir: ./build
+          destination_dir: pr-preview/${{ github.event.pull_request.number }}
+          publish_branch: gh-pages
 
-      # Output the deployed URLs (for PR preview and master deployment)
-      - name: Display deployed URLs
+      - name: Comment PR with Preview URL
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const previewUrl = `https://vimal-g-eq.github.io/testing-preview-url/pr-preview/${context.issue.number}/`
+            github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.name,
+              issue_number: context.issue.number,
+              body: `🚀 Preview deployment is ready!\n\nPreview URL: ${previewUrl}`
+            })
+
+      - name: Output URLs
         run: |
-          if [[ $GITHUB_REF == "refs/heads/master" ]]; then
-            echo "Your live app is available at https://vimal-g-eq.github.io/testing-preview-url/"
-          else
-            echo "Preview is available at https://vimal-g-eq.github.io/testing-preview-url/preview/"
+          if [[ $GITHUB_EVENT_NAME == "push" ]]; then
+            echo "Production deployment: https://vimal-g-eq.github.io/testing-preview-url/"
+          elif [[ $GITHUB_EVENT_NAME == "pull_request" ]]; then
+            echo "Preview deployment: https://vimal-g-eq.github.io/testing-preview-url/pr-preview/${{ github.event.pull_request.number }}/"
           fi

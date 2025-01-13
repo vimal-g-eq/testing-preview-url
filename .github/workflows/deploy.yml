@@ -1,5 +1,4 @@
 name: Deploy React App to GitHub Pages
-
 on:
   push:
     branches:
@@ -7,7 +6,6 @@ on:
   pull_request:
     branches:
       - master
-
 jobs:
   deploy:
     runs-on: ubuntu-latest
@@ -47,23 +45,35 @@ jobs:
           destination_dir: pr-preview/${{ github.event.pull_request.number }}
           publish_branch: gh-pages
 
-      - name: Comment PR with Preview URL
+      - name: Comment PR with Both URLs
         if: github.event_name == 'pull_request'
         uses: actions/github-script@v6
         with:
           script: |
+            const productionUrl = 'https://vimal-g-eq.github.io/testing-preview-url/'
             const previewUrl = `https://vimal-g-eq.github.io/testing-preview-url/pr-preview/${context.issue.number}/`
+            
             github.rest.issues.createComment({
               owner: context.repo.owner,
               repo: context.repo.name,
               issue_number: context.issue.number,
-              body: `🚀 Preview deployment is ready!\n\nPreview URL: ${previewUrl}`
+              body: `🚀 Deployment Information:
+              
+              📱 Preview URL (Pull Request Changes): ${previewUrl}
+              
+              🌐 Production URL (Current Master): ${productionUrl}
+              
+              - Preview URL shows the changes in this pull request
+              - Production URL shows the current live version`
             })
 
-      - name: Output URLs
+      - name: Output URLs in Actions Log
         run: |
           if [[ $GITHUB_EVENT_NAME == "push" ]]; then
-            echo "Production deployment: https://vimal-g-eq.github.io/testing-preview-url/"
+            echo "✨ Production deployment completed"
+            echo "🌐 Production URL: https://vimal-g-eq.github.io/testing-preview-url/"
           elif [[ $GITHUB_EVENT_NAME == "pull_request" ]]; then
-            echo "Preview deployment: https://vimal-g-eq.github.io/testing-preview-url/pr-preview/${{ github.event.pull_request.number }}/"
+            echo "✨ Preview deployment completed"
+            echo "📱 Preview URL: https://vimal-g-eq.github.io/testing-preview-url/pr-preview/${{ github.event.pull_request.number }}/"
+            echo "🌐 Production URL: https://vimal-g-eq.github.io/testing-preview-url/"
           fi

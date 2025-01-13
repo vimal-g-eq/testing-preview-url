@@ -10,7 +10,7 @@ permissions:
 
 jobs:
   production-deploy:
-    uses: ./.github/workflows/setup-build-deploy.yml
+    uses: ./.github/workflows/setup-build-deploy.yml  # Make sure this path is correct
     with:
       node_version: '18'
     secrets:

@@ -1,16 +1,17 @@
-# .github/workflows/production-deploy.yml
-name: Production Deployment
+# .github/workflows/preview-deploy.yml
+name: Preview Deployment
 
 on:
-  push:
+  pull_request:
     branches:
       - master
 
 permissions:
   contents: write
+  pull-requests: write
 
 jobs:
-  production-deploy:
+  preview-deploy:
     runs-on: ubuntu-latest
     
     steps:
@@ -31,13 +32,14 @@ jobs:
         env:
           CI: false
 
-      - name: Deploy Production
+      - name: Deploy Preview
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./build
+          destination_dir: preview/${{ github.event.pull_request.number }}
           publish_branch: gh-pages
 
-      - name: Output Production URL
+      - name: Output Preview URL
         run: |
-          echo "Production URL: https://vimal-g-eq.github.io/testing-preview-url"
+          echo "Preview URL: https://vimal-g-eq.github.io/testing-preview-url/preview/${{ github.event.pull_request.number }}"

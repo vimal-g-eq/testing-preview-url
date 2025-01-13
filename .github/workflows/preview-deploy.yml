@@ -27,10 +27,18 @@ jobs:
       - name: Install dependencies
         run: npm install
 
+      # Add step to modify homepage for preview build
+      - name: Update package.json for preview
+        run: |
+          json_file="package.json"
+          preview_url="https://vimal-g-eq.github.io/testing-preview-url/preview/${{ github.event.pull_request.number }}"
+          jq --arg url "$preview_url" '.homepage = $url' $json_file > tmp.json && mv tmp.json $json_file
+
       - name: Build
         run: npm run build
         env:
           CI: false
+          PUBLIC_URL: "/testing-preview-url/preview/${{ github.event.pull_request.number }}"
 
       - name: Deploy Preview
         uses: peaceiris/actions-gh-pages@v3

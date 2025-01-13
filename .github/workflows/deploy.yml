@@ -1,4 +1,5 @@
-name: Deploy React App to GitHub Pages
+name: React Deployment
+
 on:
   push:
     branches:
@@ -6,29 +7,45 @@ on:
   pull_request:
     branches:
       - master
+
+permissions:
+  contents: write
+  pull-requests: write
+
 jobs:
-  deploy:
+  build-and-deploy:
     runs-on: ubuntu-latest
-    permissions:
-      contents: write
+    
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Setup Node.js
+      - name: Setup Node
         uses: actions/setup-node@v3
         with:
           node-version: '18'
+          cache: 'npm'
 
       - name: Install dependencies
         run: npm install
 
-      - name: Build the app
+      - name: Build
         run: npm run build
         env:
           CI: false
 
-      - name: Deploy to GitHub Pages (Production)
+      # Deploy preview for pull requests
+      - name: Deploy Preview
+        if: github.event_name == 'pull_request'
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./build
+          destination_dir: preview/${{ github.event.pull_request.number }}
+          publish_branch: gh-pages
+
+      # Deploy production for master branch
+      - name: Deploy Production
         if: github.event_name == 'push' && github.ref == 'refs/heads/master'
         uses: peaceiris/actions-gh-pages@v3
         with:
@@ -36,44 +53,26 @@ jobs:
           publish_dir: ./build
           publish_branch: gh-pages
 
-      - name: Deploy Preview
-        if: github.event_name == 'pull_request'
-        uses: peaceiris/actions-gh-pages@v3
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./build
-          destination_dir: pr-preview/${{ github.event.pull_request.number }}
-          publish_branch: gh-pages
-
-      - name: Comment PR with Both URLs
+      # Add comment to PR with URLs
+      - name: Add PR Comment
         if: github.event_name == 'pull_request'
         uses: actions/github-script@v6
         with:
           script: |
-            const productionUrl = 'https://vimal-g-eq.github.io/testing-preview-url/'
-            const previewUrl = `https://vimal-g-eq.github.io/testing-preview-url/pr-preview/${context.issue.number}/`
+            const preview_url = `https://vimal-g-eq.github.io/testing-preview-url/preview/${context.issue.number}`;
+            const production_url = 'https://vimal-g-eq.github.io/testing-preview-url';
             
-            github.rest.issues.createComment({
+            const comment = `## 🚀 Deployment URLs
+            
+            ### ✨ Preview (Your Changes)
+            ${preview_url}
+            
+            ### 🌍 Production (Current Master)
+            ${production_url}`;
+            
+            await github.rest.issues.createComment({
               owner: context.repo.owner,
               repo: context.repo.name,
               issue_number: context.issue.number,
-              body: `🚀 Deployment Information:
-              
-              📱 Preview URL (Pull Request Changes): ${previewUrl}
-              
-              🌐 Production URL (Current Master): ${productionUrl}
-              
-              - Preview URL shows the changes in this pull request
-              - Production URL shows the current live version`
-            })
-
-      - name: Output URLs in Actions Log
-        run: |
-          if [[ $GITHUB_EVENT_NAME == "push" ]]; then
-            echo "✨ Production deployment completed"
-            echo "🌐 Production URL: https://vimal-g-eq.github.io/testing-preview-url/"
-          elif [[ $GITHUB_EVENT_NAME == "pull_request" ]]; then
-            echo "✨ Preview deployment completed"
-            echo "📱 Preview URL: https://vimal-g-eq.github.io/testing-preview-url/pr-preview/${{ github.event.pull_request.number }}/"
-            echo "🌐 Production URL: https://vimal-g-eq.github.io/testing-preview-url/"
-          fi
+              body: comment
+            });

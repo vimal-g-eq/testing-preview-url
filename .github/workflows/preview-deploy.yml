@@ -1,4 +1,3 @@
-# .github/workflows/preview-deploy.yml
 name: Preview Deployment
 
 on:
@@ -12,34 +11,29 @@ permissions:
 
 jobs:
   preview-deploy:
+    uses: ./.github/workflows/setup-build-deploy.yml
+    with:
+      node_version: '18'
+    secrets:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  update-package-json:
+    needs: preview-deploy
     runs-on: ubuntu-latest
-    
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Setup Node
-        uses: actions/setup-node@v3
-        with:
-          node-version: '18'
-          cache: 'npm'
-
-      - name: Install dependencies
-        run: npm install
-
-      # Add step to modify homepage for preview build
       - name: Update package.json for preview
         run: |
           json_file="package.json"
           preview_url="https://vimal-g-eq.github.io/testing-preview-url/preview/${{ github.event.pull_request.number }}"
           jq --arg url "$preview_url" '.homepage = $url' $json_file > tmp.json && mv tmp.json $json_file
 
-      - name: Build
-        run: npm run build
-        env:
-          CI: false
-          PUBLIC_URL: "/testing-preview-url/preview/${{ github.event.pull_request.number }}"
-
+  deploy-preview:
+    needs: update-package-json
+    runs-on: ubuntu-latest
+    steps:
       - name: Deploy Preview
         uses: peaceiris/actions-gh-pages@v3
         with:
